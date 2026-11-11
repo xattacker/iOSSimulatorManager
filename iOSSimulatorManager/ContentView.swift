@@ -8,7 +8,7 @@ struct ContentView: View {
         NavigationStack {
             Group {
                 if manager.isLoading && manager.groups.isEmpty {
-                    ProgressView("載入中…")
+                    ProgressView("Loading…")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if !manager.isLoading && manager.groups.isEmpty {
                     ContentUnavailableView(
@@ -20,7 +20,7 @@ struct ContentView: View {
                     simulatorList
                 }
             }
-            .navigationTitle("iOS 模擬器管理")
+            .navigationTitle("iOS Simulator Manager")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     if manager.isLoading {
@@ -32,7 +32,7 @@ struct ContentView: View {
                         } label: {
                             Image(systemName: "arrow.clockwise")
                         }
-                        .help("重新整理")
+                        .help("Reload")
                     }
                 }
             }
