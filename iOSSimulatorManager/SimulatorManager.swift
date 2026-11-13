@@ -61,6 +61,18 @@ final class SimulatorManager {
         await loadDevices()
     }
 
+    func deleteUnavailableDevices() async {
+        isLoading = true
+        do {
+            try await shellRun("/usr/bin/xcrun", args: ["simctl", "delete", "unavailable"])
+        } catch {
+            isLoading = false
+            errorMessage = error.localizedDescription
+            return
+        }
+        await loadDevices()
+    }
+
     private func parseDevices(from jsonString: String) throws -> [SimulatorGroup] {
         guard let data = jsonString.data(using: .utf8) else {
             throw SimulatorError.invalidOutput
