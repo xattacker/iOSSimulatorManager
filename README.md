@@ -1,2 +1,1 @@
-- iOSSimulatorManager
-a Mac SwiftUI GUI 
+- iOSSimulatorManager a Mac SwiftUI GUI 
