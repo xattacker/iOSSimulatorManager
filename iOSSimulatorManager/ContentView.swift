@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var manager = SimulatorManager()
     @State private var pendingDelete: SimulatorDevice?
+    @State private var showCleanConfirm = false
 
     var body: some View {
         NavigationStack {
@@ -22,6 +23,15 @@ struct ContentView: View {
             }
             .navigationTitle("iOS Simulator Manager")
             .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showCleanConfirm = true
+                    } label: {
+                        Image(systemName: "trash.slash")
+                    }
+                    .help("刪除所有不可用的模擬器")
+                    .disabled(manager.isLoading)
+                }
                 ToolbarItem(placement: .primaryAction) {
                     if manager.isLoading {
                         ProgressView()
@@ -65,6 +75,14 @@ struct ContentView: View {
         } message: { device in
             Text("確定要刪除模擬器「\(device.name)」嗎？此操作無法復原。")
         }
+        .confirmationDialog("刪除不可用的模擬器", isPresented: $showCleanConfirm) {
+            Button("刪除", role: .destructive) {
+                Task { await manager.deleteUnavailableDevices() }
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("將執行 xcrun simctl delete unavailable，刪除所有不可用的模擬器裝置。此操作無法復原。")
+        }
         .task {
             await manager.loadDevices()
         }
@@ -73,11 +91,15 @@ struct ContentView: View {
     private var simulatorList: some View {
         List {
             ForEach(manager.groups) { group in
-                Section(group.displayName) {
-                    ForEach(group.devices) { device in
-                        DeviceRow(device: device) {
-                            pendingDelete = device
-                        }
+                // 使用普通的列取代 Section 標題，避免標題在滾動時黏在頂端
+                Text(group.displayName)
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 8)
+                    .selectionDisabled()
+                ForEach(group.devices) { device in
+                    DeviceRow(device: device) {
+                        pendingDelete = device
                     }
                 }
             }
