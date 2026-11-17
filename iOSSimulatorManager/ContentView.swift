@@ -98,9 +98,12 @@ struct ContentView: View {
                     .padding(.top, 8)
                     .selectionDisabled()
                 ForEach(group.devices) { device in
-                    DeviceRow(device: device) {
+                    DeviceRow(device: device, onShutdown: {
+                        let udid = device.udid
+                        Task { await manager.shutdownDevice(udid: udid) }
+                    }, onDelete: {
                         pendingDelete = device
-                    }
+                    })
                 }
             }
         }
@@ -111,6 +114,7 @@ struct ContentView: View {
 
 struct DeviceRow: View {
     let device: SimulatorDevice
+    let onShutdown: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -129,6 +133,15 @@ struct DeviceRow: View {
             }
 
             Spacer()
+
+            if device.isBooted {
+                Button(action: onShutdown) {
+                    Image(systemName: "power")
+                        .foregroundStyle(.orange)
+                }
+                .buttonStyle(.plain)
+                .help("關閉模擬器")
+            }
 
             Text(device.isBooted ? "運行中" : "已關機")
                 .font(.caption)
