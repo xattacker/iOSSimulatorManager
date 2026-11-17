@@ -49,6 +49,18 @@ final class SimulatorManager {
         }
     }
 
+    func shutdownDevice(udid: String) async {
+        isLoading = true
+        do {
+            try await shellRun("/usr/bin/xcrun", args: ["simctl", "shutdown", udid])
+        } catch {
+            isLoading = false
+            errorMessage = error.localizedDescription
+            return
+        }
+        await loadDevices()
+    }
+
     func deleteDevice(udid: String) async {
         isLoading = true
         do {
